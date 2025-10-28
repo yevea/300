@@ -1,1 +1,3 @@
-# 300
+# yevea.com/300 
+Proyecto "tablero.yevea"
+Soy Martin Cecetka, el carpintero artesano con algunos rasgos de autista. Mantego este proyecto con ayuda de la IA por mi propia necesidad: cómo artista, no puedo atender debidamente a los clientes, los cuales me hacen las mismas preguntas una y otra vez. Socialización no es mi fuerte, de hecho me roba la energía la cual quiero dedicar a mi arte. El objetivo de la pwa es liberarme del mayor devorador de mi tiempo - atención al cliente. En concreto el proyecto "tablero.yevea" es un pwa de configuración detallada y compra de tableros de madera de olivo a medida. Proporciona la posibilidad de configurar el tablero a medida sin tener que comunicarse con un humano. La pwa tiene objetivo de ser simple e intuitiva.
