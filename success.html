@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso</title>
+</head>
+<body>
+    <header>
+        <h1>¡Pago Completado!</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2>✓ Tu pedido ha sido procesado con éxito</h2>
+            <p>Número de sesión: <span id="sessionId"></span></p>
+            <p>Recibirás un email de confirmación en breve.</p>
+            <a href="index.html">Volver a la tienda</a>
+        </section>
+        
+        <section id="orderDetails">
+            <h3>Detalles del pedido:</h3>
+            <div id="details"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mi Tienda</p>
+    </footer>
+
+    <script>
+        // Obtener session_id de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (sessionId) {
+            document.getElementById('sessionId').textContent = sessionId;
+            
+            // Opcional: Verificar el pago con tu backend
+            fetch('verify-payment.php?session_id=' + sessionId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const detailsDiv = document.getElementById('details');
+                        detailsDiv.innerHTML = `
+                            <p><strong>Email:</strong> ${data.customer_email || 'N/A'}</p>
+                            <p><strong>Total pagado:</strong> €${(data.amount_total / 100).toFixed(2)}</p>
+                            <p><strong>Estado:</strong> ${data.payment_status}</p>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

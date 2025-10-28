@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Producto - Tienda Online</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <header>
+        <h1>Mi Tienda</h1>
+        <button id="installBtn">Instalar App</button>
+        <div id="cartCount">Carrito: <span>0</span></div>
+    </header>
+
+    <main>
+        <section id="product">
+            <img src="product.jpg" alt="Producto" width="300">
+            <h2>Nombre del Producto</h2>
+            <p>Descripción detallada del producto. Características principales y beneficios.</p>
+            <p><strong>Precio: €99.99</strong></p>
+            <label>
+                Cantidad: 
+                <input type="number" id="quantity" value="1" min="1" max="10">
+            </label>
+            <button id="addToCart">Añadir al Carrito</button>
+        </section>
+
+        <section id="cartSection">
+            <h2>Carrito de Compras</h2>
+            <div id="cartItems"></div>
+            <p id="totalPrice"><strong>Total: €0.00</strong></p>
+            <button id="checkout">Proceder al Pago</button>
+            <button id="clearCart">Vaciar Carrito</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mi Tienda</p>
+    </footer>
+
+    <script>
+        // Configuración del producto
+        const product = {
+            name: 'Nombre del Producto',
+            price: 99.99,
+            image: 'product.jpg'
+        };
+
+        // Estado del carrito (almacenado en memoria)
+        let cart = [];
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado', reg))
+                .catch(err => console.log('Error al registrar SW', err));
+        }
+
+        // Instalación de PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Resultado:', outcome);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Funcionalidad del carrito
+        function updateCartDisplay() {
+            const cartCount = document.querySelector('#cartCount span');
+            const cartItems = document.getElementById('cartItems');
+            const totalPrice = document.getElementById('totalPrice');
+            
+            let total = 0;
+            let itemCount = 0;
+            
+            cartItems.innerHTML = '';
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                itemCount += item.quantity;
+                
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <p>
+                        ${item.name} x ${item.quantity} = €${itemTotal.toFixed(2)}
+                        <button onclick="removeFromCart(${index})">Eliminar</button>
+                    </p>
+                `;
+                cartItems.appendChild(div);
+            });
+            
+            cartCount.textContent = itemCount;
+            totalPrice.innerHTML = `<strong>Total: €${total.toFixed(2)}</strong>`;
+        }
+
+        document.getElementById('addToCart').addEventListener('click', () => {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            const existingItem = cart.find(item => item.name === product.name);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
+                });
+            }
+            
+            updateCartDisplay();
+            alert('Producto añadido al carrito');
+        });
+
+        window.removeFromCart = function(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+        };
+
+        document.getElementById('clearCart').addEventListener('click', () => {
+            if (confirm('¿Vaciar el carrito?')) {
+                cart = [];
+                updateCartDisplay();
+            }
+        });
+
+        // ⭐ INTEGRACIÓN CON STRIPE ⭐
+        document.getElementById('checkout').addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+            
+            // Preparar datos del pedido
+            const orderData = {
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+            
+            // Deshabilitar botón mientras procesa
+            const checkoutBtn = document.getElementById('checkout');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Procesando...';
+            
+            console.log('Enviando datos al servidor:', orderData);
+            
+            // Crear sesión de pago con Stripe
+            fetch('create-checkout-session.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => {
+                console.log('Respuesta del servidor:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos recibidos:', data);
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Proceder al Pago';
+                    return;
+                }
+                
+                // Redirigir a Stripe Checkout
+                const stripe = Stripe(data.publishableKey);
+                return stripe.redirectToCheckout({ sessionId: data.sessionId });
+            })
+            .then(result => {
+                if (result && result.error) {
+                    alert(result.error.message);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Proceder al Pago';
+                }
+            })
+            .catch(error => {
+                console.error('Error completo:', error);
+                alert('Error al procesar el pago. Revisa la consola (F12)');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceder al Pago';
+            });
+        });
+
+        // Inicializar
+        installBtn.style.display = 'none';
+        updateCartDisplay();
+    </script>
+</body>
+</html>
