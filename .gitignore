@@ -1,4 +1,5 @@
-   stripe-config.php
-   orders.json
-   webhook_log.json
-   *.log
+/stripe-php
+stripe-config.php
+orders.json
+webhook_log.json
+*.log
