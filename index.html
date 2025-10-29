@@ -3,208 +3,577 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Producto - Tienda Online</title>
+    <title>Tablero de Madera de Olivo - Tienda Online</title>
+    <meta name="description" content="Tablero de madera de olivo maciza, hecho a mano en España. Personaliza tamaño y cantos. Envío gratis en España. Garantía de 5 años.">
+    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2196F3">
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        #installBtn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0.5rem;
+            display: none;
+        }
+        
+        #cartCount {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 0.5rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 0;
+            margin: 1.5rem auto;
+            max-width: 700px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        section h2 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            font-size: 1.3rem;
+        }
+        
+        section > div,
+        section > p {
+            padding: 1rem 1.5rem;
+        }
+        
+        section > p {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        label {
+            display: block;
+            margin: 1rem 0 0.5rem 0;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input[type="radio"] {
+            width: auto;
+            margin: 0 8px 0 0;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+        
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 4px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #ccc;
+        }
+        
+        button:disabled:hover {
+            background: white;
+            color: #ccc;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            width: 100%;
+            max-width: 400px;
+            display: block;
+            margin: 1rem auto;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        #board-svg {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .edges-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+            gap: 2rem;
+        }
+        
+        .edges-options {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        .edges-options > div {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .edges-options strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+        
+        .usage-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .usage-option {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .usage-option:has(input:checked) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .usage-option label {
+            margin: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        #uso-otro-input {
+            width: calc(100% - 30px);
+            margin: 8px 0 0 30px;
+            display: none;
+        }
+        
+        #edgesSummary,
+        #usageSummary {
+            background: #f0f4ff;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        #priceDisplay {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .cart-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 0;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        #totalPrice {
+            background: #f0f4ff;
+            padding: 1.5rem;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .dimension-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0.5rem 0;
+        }
+        
+        .dimension-controls input {
+            flex: 1;
+            margin: 0;
+        }
+        
+        .dimension-controls button {
+            flex: 0 0 auto;
+            padding: 10px 16px;
+            margin: 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            background: white;
+            margin-top: 2rem;
+        }
+        
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .trust-badges span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .edges-container {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .usage-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.4rem;
+            }
+            
+            section {
+                margin: 1rem 0.5rem;
+                border-radius: 0;
+            }
+            
+            .edges-options {
+                grid-template-columns: 1fr;
+            }
+            
+            #priceDisplay {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Mi Tienda</h1>
-        <button id="installBtn">Instalar App</button>
-        <div id="cartCount">Carrito: <span>0</span></div>
+        <h1>🌿 Tablero de Madera de Olivo</h1>
+        <p>Artesanía española · Personalizable · Envío gratis</p>
+        <button id="installBtn">📱 Instalar App</button>
+        <div id="cartCount">🛒 Carrito: <span>0</span></div>
     </header>
 
     <main>
-        <section id="product">
-            <img src="product.jpg" alt="Producto" width="300">
-            <h2>Nombre del Producto</h2>
-            <p>Descripción detallada del producto. Características principales y beneficios.</p>
-            <p><strong>Precio: €99.99</strong></p>
-            <label>
-                Cantidad: 
-                <input type="number" id="quantity" value="1" min="1" max="10">
-            </label>
-            <button id="addToCart">Añadir al Carrito</button>
+        <section>
+            <h2>1️⃣ Dimensiones</h2>
+            <p>Los tableros se fabrican a mano con madera de olivo maciza por encargo. Personaliza tu tablero según tus especificaciones.</p>
+            <div>
+                <label for="thickness">Grosor (cm):</label>
+                <select id="thickness">
+                    <option value="3">3 cm - 900€/m²</option>
+                    <option value="5" selected>5 cm - 1200€/m²</option>
+                    <option value="7">7 cm - 1500€/m²</option>
+                </select>
+                
+                <label for="length">Longitud (cm) <small style="color: #999;">· mínimo 50 cm - máximo 300 cm</small></label>
+                <div class="dimension-controls">
+                    <button type="button" onclick="changeValue('length', -10)">−10</button>
+                    <button type="button" onclick="changeValue('length', -1)">−1</button>
+                    <input type="number" id="length" min="50" max="300" value="80" oninput="validateInput(this)">
+                    <button type="button" onclick="changeValue('length', 1)">+1</button>
+                    <button type="button" onclick="changeValue('length', 10)">+10</button>
+                </div>
+                
+                <label for="width">Ancho (cm) <small style="color: #999;">· mínimo 20 cm - máximo 100 cm</small></label>
+                <div class="dimension-controls">
+                    <button type="button" onclick="changeValue('width', -10)">−10</button>
+                    <button type="button" onclick="changeValue('width', -1)">−1</button>
+                    <input type="number" id="width" min="20" max="100" value="30" oninput="validateInput(this)">
+                    <button type="button" onclick="changeValue('width', 1)">+1</button>
+                    <button type="button" onclick="changeValue('width', 10)">+10</button>
+                </div>
+                
+                <div style="text-align: center; margin: 2rem 0;">
+                    <p style="font-size: 1.1rem; color: #666; margin-bottom: 0.5rem;">Precio estimado:</p>
+                    <div id="priceDisplay">0.00 €</div>
+                    <small style="color: #999;">Precio final calculado por m² según dimensiones</small>
+                </div>
+            </div>
         </section>
 
-        <section id="cartSection">
-            <h2>Carrito de Compras</h2>
-            <div id="cartItems"></div>
-            <p id="totalPrice"><strong>Total: €0.00</strong></p>
-            <button id="checkout">Proceder al Pago</button>
-            <button id="clearCart">Vaciar Carrito</button>
+        <section>
+            <h2>2️⃣ Cantos</h2>
+            <p>Elige el tipo de canto para cada lado: <strong>recto</strong> (cortado a máquina) o <strong>rústico</strong> (borde natural del árbol).</p>
+            <div class="edges-container">
+                <svg id="board-svg" role="img" aria-label="Diagrama de configuración de cantos" width="240" height="180" viewBox="0 0 240 180">
+                    <path id="edge-north" d="M30,60 H210" stroke="#999" stroke-width="6" fill="none"/>
+                    <path id="edge-east" d="M210,60 V140" stroke="#999" stroke-width="6" fill="none"/>
+                    <path id="edge-south" d="M210,140 H30" stroke="#999" stroke-width="6" fill="none"/>
+                    <path id="edge-west" d="M30,140 V60" stroke="#999" stroke-width="6" fill="none"/>
+                    <text x="120" y="20" text-anchor="middle" font-size="16" fill="#667eea" font-weight="bold">DIAGRAMA DE CANTOS</text>
+                    <text x="120" y="48" text-anchor="middle" font-size="13" fill="#333">Trasero</text>
+                    <text x="225" y="35" text-anchor="start" font-size="13" fill="#333" transform="rotate(90,205,60)">Derecho</text>
+                    <text x="120" y="164" text-anchor="middle" font-size="13" fill="#333">Frontal</text>
+                    <text x="-25" y="73" text-anchor="end" font-size="13" fill="#333" transform="rotate(-90,15,60)">Izquierdo</text>
+                </svg>
+                <div class="edges-options">
+                    <div>
+                        <strong>Canto Trasero</strong>
+                        <label>
+                            <input type="radio" name="edge-north" value="recto" checked onchange="updateEdge('north')">
+                            Recto
+                        </label>
+                        <label>
+                            <input type="radio" name="edge-north" value="rustico" onchange="updateEdge('north')">
+                            Rústico
+                        </label>
+                    </div>
+                    <div>
+                        <strong>Canto Frontal</strong>
+                        <label>
+                            <input type="radio" name="edge-south" value="recto" checked onchange="updateEdge('south')">
+                            Recto
+                        </label>
+                        <label>
+                            <input type="radio" name="edge-south" value="rustico" onchange="updateEdge('south')">
+                            Rústico
+                        </label>
+                    </div>
+                    <div>
+                        <strong>Canto Izquierdo</strong>
+                        <label>
+                            <input type="radio" name="edge-west" value="recto" checked onchange="updateEdge('west')">
+                            Recto
+                        </label>
+                        <label>
+                            <input type="radio" name="edge-west" value="rustico" onchange="updateEdge('west')">
+                            Rústico
+                        </label>
+                    </div>
+                    <div>
+                        <strong>Canto Derecho</strong>
+                        <label>
+                            <input type="radio" name="edge-east" value="recto" checked onchange="updateEdge('east')">
+                            Recto
+                        </label>
+                        <label>
+                            <input type="radio" name="edge-east" value="rustico" onchange="updateEdge('east')">
+                            Rústico
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div id="edgesSummary"></div>
+        </section>
+
+        <section>
+            <h2>3️⃣ Uso</h2>
+            <p>¿Para qué usarás el tablero? Esto nos ayuda a generar el nombre correcto del producto.</p>
+            <div style="padding: 1rem 1.5rem;">
+                <div class="usage-options">
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="tabletop" id="uso-tabletop" checked>
+                            <span>Encimera de mesa</span>
+                        </label>
+                    </div>
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="kitchen-countertop" id="uso-kitchen-countertop">
+                            <span>Encimera de cocina</span>
+                        </label>
+                    </div>
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="kitchen-island" id="uso-kitchen-island">
+                            <span>Isla de cocina</span>
+                        </label>
+                    </div>
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="bathroom-countertop" id="uso-bathroom-countertop">
+                            <span>Encimera de baño</span>
+                        </label>
+                    </div>
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="shelf" id="uso-shelf">
+                            <span>Estante</span>
+                        </label>
+                    </div>
+                    <div class="usage-option">
+                        <label>
+                            <input type="radio" name="uso" value="other" id="uso-other-radio">
+                            <span>Otro (especificar)</span>
+                        </label>
+                        <input type="text" id="uso-otro-input" placeholder="¿Para qué lo usarás?">
+                    </div>
+                </div>
+                <div id="usageSummary"></div>
+            </div>
+        </section>
+
+        <section>
+            <h2>4️⃣ Carrito</h2>
+            <p>Añade el tablero configurado al carrito. Puedes añadir múltiples tableros con diferentes configuraciones.</p>
+            <div style="text-align: center;">
+                <button id="addToCart" class="btn-primary">
+                    ➕ Añadir al Carrito
+                </button>
+                <div class="trust-badges">
+                    <span>🛠️ Hecho a mano</span>
+                    <span>🚚 Envío gratis en España</span>
+                    <span>⭐ Garantía 5 años</span>
+                </div>
+            </div>
+            <div style="padding: 1rem 1.5rem;">
+                <div id="cartItems">
+                    <p style="text-align: center; color: #999; padding: 2rem;">Tu carrito está vacío.</p>
+                </div>
+                <div id="totalPrice" style="display: none;"></div>
+                <button id="clearCart" class="btn-danger" style="width: 100%; max-width: 300px; display: block; margin: 1rem auto;">
+                    🗑️ Vaciar Carrito
+                </button>
+            </div>
+        </section>
+
+        <section>
+            <h2>5️⃣ Pago</h2>
+            <p>Procede al pago seguro con Stripe. <strong>Pedido mínimo: 175 €</strong></p>
+            <div style="text-align: center;">
+                <button id="checkout" class="btn-primary" disabled>
+                    💳 Completar Pedido →
+                </button>
+                <div class="trust-badges">
+                    <span>🔒 Pago 100% Seguro</span>
+                    <span>📦 Entrega en 3 Semanas</span>
+                </div>
+                <p style="font-size: 0.85rem; color: #999; margin-top: 1rem;">
+                    Al completar tu pedido aceptas nuestros términos y condiciones.<br>
+                    Procesado por Stripe. No guardamos información de tarjetas.
+                </p>
+            </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Mi Tienda</p>
+        <p><strong>Tienda de Tableros de Olivo</strong></p>
+        <p>Artesanía española · Madera de olivo maciza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
     </footer>
 
-    <script>
-        // Configuración del producto
-        const product = {
-            name: 'Nombre del Producto',
-            price: 99.99,
-            image: 'product.jpg'
-        };
-
-        // Estado del carrito (almacenado en memoria)
-        let cart = [];
-
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado', reg))
-                .catch(err => console.log('Error al registrar SW', err));
-        }
-
-        // Instalación de PWA
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'block';
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log('Resultado:', outcome);
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
-
-        // Funcionalidad del carrito
-        function updateCartDisplay() {
-            const cartCount = document.querySelector('#cartCount span');
-            const cartItems = document.getElementById('cartItems');
-            const totalPrice = document.getElementById('totalPrice');
-            
-            let total = 0;
-            let itemCount = 0;
-            
-            cartItems.innerHTML = '';
-            
-            cart.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                itemCount += item.quantity;
-                
-                const div = document.createElement('div');
-                div.innerHTML = `
-                    <p>
-                        ${item.name} x ${item.quantity} = €${itemTotal.toFixed(2)}
-                        <button onclick="removeFromCart(${index})">Eliminar</button>
-                    </p>
-                `;
-                cartItems.appendChild(div);
-            });
-            
-            cartCount.textContent = itemCount;
-            totalPrice.innerHTML = `<strong>Total: €${total.toFixed(2)}</strong>`;
-        }
-
-        document.getElementById('addToCart').addEventListener('click', () => {
-            const quantity = parseInt(document.getElementById('quantity').value);
-            
-            const existingItem = cart.find(item => item.name === product.name);
-            
-            if (existingItem) {
-                existingItem.quantity += quantity;
-            } else {
-                cart.push({
-                    name: product.name,
-                    price: product.price,
-                    quantity: quantity
-                });
-            }
-            
-            updateCartDisplay();
-            alert('Producto añadido al carrito');
-        });
-
-        window.removeFromCart = function(index) {
-            cart.splice(index, 1);
-            updateCartDisplay();
-        };
-
-        document.getElementById('clearCart').addEventListener('click', () => {
-            if (confirm('¿Vaciar el carrito?')) {
-                cart = [];
-                updateCartDisplay();
-            }
-        });
-
-        // ⭐ INTEGRACIÓN CON STRIPE ⭐
-        document.getElementById('checkout').addEventListener('click', () => {
-            if (cart.length === 0) {
-                alert('El carrito está vacío');
-                return;
-            }
-            
-            // Preparar datos del pedido
-            const orderData = {
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-            };
-            
-            // Deshabilitar botón mientras procesa
-            const checkoutBtn = document.getElementById('checkout');
-            checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'Procesando...';
-            
-            console.log('Enviando datos al servidor:', orderData);
-            
-            // Crear sesión de pago con Stripe
-            fetch('create-checkout-session.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(orderData)
-            })
-            .then(response => {
-                console.log('Respuesta del servidor:', response);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Datos recibidos:', data);
-                
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.textContent = 'Proceder al Pago';
-                    return;
-                }
-                
-                // Redirigir a Stripe Checkout
-                const stripe = Stripe(data.publishableKey);
-                return stripe.redirectToCheckout({ sessionId: data.sessionId });
-            })
-            .then(result => {
-                if (result && result.error) {
-                    alert(result.error.message);
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.textContent = 'Proceder al Pago';
-                }
-            })
-            .catch(error => {
-                console.error('Error completo:', error);
-                alert('Error al procesar el pago. Revisa la consola (F12)');
-                checkoutBtn.disabled = false;
-                checkoutBtn.textContent = 'Proceder al Pago';
-            });
-        });
-
-        // Inicializar
-        installBtn.style.display = 'none';
-        updateCartDisplay();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
